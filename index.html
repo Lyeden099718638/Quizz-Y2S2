@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="km"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiz ត្រៀមប្រឡង</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--tx:#1b2433;--mu:#6b7686;--bd:#e2e7f0;--pr:#3b6cf6;--ok:#16a34a;--okb:#dcfce7;--no:#dc2626;--nob:#fee2e2}
+@media(prefers-color-scheme:dark){:root{--bg:#0f141c;--card:#18202c;--tx:#e8edf5;--mu:#93a0b4;--bd:#2a3445;--pr:#6b8cff;--ok:#4ade80;--okb:#12301f;--no:#f87171;--nob:#3a1717}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.75 'Kantumruy Pro','Noto Sans Khmer',system-ui,sans-serif}
+.w{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:28px;margin:8px 0 4px}h2{font-size:22px;margin:0 0 8px}.mu{color:var(--mu)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin-top:20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;cursor:pointer;transition:.15s}
+.card:hover{transform:translateY(-2px);border-color:var(--pr)}.card b{font-size:19px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:12px;padding:10px 20px;background:var(--pr);color:#fff;cursor:pointer}
+.btn.g{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}
+.chip{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:6px 16px;cursor:pointer}
+.chip.on{background:var(--pr);border-color:var(--pr);color:#fff}
+.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden;margin:12px 0 20px}.bar i{display:block;height:100%;background:var(--pr);transition:.3s}
+.q{font-size:20px;font-weight:600;line-height:1.8;margin:0 0 16px}
+.o{display:flex;gap:12px;width:100%;text-align:left;font:inherit;background:var(--card);color:var(--tx);border:2px solid var(--bd);border-radius:14px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
+.o:hover:not(:disabled){border-color:var(--pr)}.o span{font-weight:700;color:var(--mu);min-width:20px}
+.o.ok{border-color:var(--ok);background:var(--okb)}.o.no{border-color:var(--no);background:var(--nob)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.big{font-size:56px;font-weight:700;margin:6px 0}.rv{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px}
+.hide{display:none}.iw{overflow-x:auto;margin-bottom:14px}.qi{display:block;width:100%;min-width:700px;margin:0;border:1px solid var(--bd);border-radius:12px;background:#fff}.o.sel{border-color:var(--pr)}.o.miss{border-color:var(--ok);border-style:dashed}.lt{justify-content:center}.tfr{display:flex;align-items:center;gap:8px;margin-bottom:10px}.tfr b{min-width:24px}.tfr .o{margin:0;justify-content:center;flex:1}.badge{display:inline-block;background:var(--bd);border-radius:999px;padding:0 10px;font-size:14px;margin-left:6px}
+</style></head><body><div class="w" id="app"></div>
+<script src="data.js"></script>
+<script>
+const D=window.QUIZ_DATA,$=document.getElementById('app'),L='ABCDE';
+let st={mode:'seq',n:0},run=null;
+const best=()=>{try{return JSON.parse(localStorage.getItem('qb')||'{}')}catch(e){return{}}};
+const setBest=(k,v)=>{try{const b=best();b[k]=Math.max(b[k]||0,v);localStorage.setItem('qb',JSON.stringify(b))}catch(e){}};
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const arr=a=>Array.isArray(a)?a:[a];
+function home(){run=null;
+ $.innerHTML=`<h1>📚 Quiz ត្រៀមប្រឡង</h1><div class="mu">ជ្រើសរើសមុខវិជ្ជាដើម្បីចាប់ផ្តើម</div><div class="grid">`+
+ D.map(s=>{const b=best()[s.id];return`<div class="card" onclick="setup('${s.id}')"><b>${s.name}</b><div class="mu">${s.en} · ${s.questions.length} សំណួរ</div><div class="mu">${b!=null?'ពិន្ទុល្អបំផុត '+b+'%':'មិនទាន់ធ្វើ'}</div></div>`}).join('')+`</div>`}
+function setup(id){const s=D.find(x=>x.id==id),N=s.questions.length;st.id=id;
+ const ns=[10,20,50,N].filter((v,i,a)=>v<=N&&a.indexOf(v)==i);if(!ns.includes(st.n))st.n=N;
+ $.innerHTML=`<button class="btn g" onclick="home()">← ត្រឡប់</button><h2 style="margin-top:16px">${s.name}</h2><div class="mu">${N} សំណួរ</div>
+ <p><b>លំដាប់សំណួរ</b></p><div class="row"><button class="chip ${st.mode=='seq'?'on':''}" onclick="st.mode='seq';setup('${id}')">តាមលំដាប់</button><button class="chip ${st.mode=='rnd'?'on':''}" onclick="st.mode='rnd';setup('${id}')">ចៃដន្យ</button></div>
+ <p><b>ចំនួនសំណួរ</b></p><div class="row">${ns.map(v=>`<button class="chip ${st.n==v?'on':''}" onclick="st.n=${v};setup('${id}')">${v==N?'ទាំងអស់ ('+N+')':v}</button>`).join('')}</div>
+ <button class="btn" onclick="start(null)">ចាប់ផ្តើម</button>`}
+function start(list){const s=D.find(x=>x.id==st.id);
+ let qs=list||s.questions.map(q=>({...q}));
+ if(!list){if(st.mode=='rnd')qs=qs.sort(()=>Math.random()-.5);qs=qs.slice(0,st.n)}
+ run={s,qs,k:0,sc:0,bad:[],sel:[],tf:[],done:false};show()}
+const stem=q=>q.img?`<div class="iw"><img class="qi" src="${q.img}" alt="question"></div>`:`<p class="q">${esc(q.q)}</p>`;
+function show(){const{qs,k}=run,q=qs[k];run.sel=[];run.tf=[];run.done=false;
+ const n=q.img?q.n:q.o.length;let body='';
+ if(q.tf)body=q.tf.map((_,i)=>`<div class="tfr"><b>${'abcde'[i]}.</b><button class="o" onclick="tfp(${i},true)" id="t${i}t">True</button><button class="o" onclick="tfp(${i},false)" id="t${i}f">False</button></div>`).join('')+`<button class="btn" id="ck" onclick="check()">ពិនិត្យ</button>`;
+ else{const m=Array.isArray(q.a);
+  body=(m?`<div class="mu" style="margin-bottom:8px">ជ្រើសបានច្រើនចម្លើយ (${q.a.length})</div>`:'')+Array.from({length:n},(_,i)=>`<button class="o ${q.img?'lt':''}" onclick="pick(${i})"><span>${L[i]}</span>${q.img?'':`<div>${esc(q.o[i])}</div>`}</button>`).join('')+(m?`<button class="btn" id="ck" onclick="check()">ពិនិត្យ</button>`:'')}
+ $.innerHTML=`<div class="top"><button class="btn g" onclick="if(confirm('ចាកចេញពី Quiz?'))home()">✕</button><span class="mu">${k+1} / ${qs.length} · ត្រូវ ${run.sc}</span></div>
+ <div class="bar"><i style="width:${k/qs.length*100}%"></i></div>${stem(q)}${body}
+ <div class="row"><button class="btn hide" id="nx" onclick="next()">${k+1==qs.length?'មើលលទ្ធផល':'បន្ទាប់ →'}</button></div>`}
+const bs=()=>[...document.querySelectorAll('.o')];
+function pick(i){if(run.done)return;const q=run.qs[run.k];
+ if(Array.isArray(q.a)){const j=run.sel.indexOf(i);j<0?run.sel.push(i):run.sel.splice(j,1);bs().forEach((b,x)=>b.classList.toggle('sel',run.sel.includes(x)));return}
+ run.done=true;const b=bs();b.forEach((x,j)=>{x.disabled=true;if(j==q.a)x.classList.add('ok')});
+ if(i==q.a)run.sc++;else{b[i].classList.add('no');run.bad.push(q)}
+ document.getElementById('nx').classList.remove('hide')}
+function tfp(i,v){if(run.done)return;run.tf[i]=v;document.getElementById('t'+i+'t').classList.toggle('sel',v===true);document.getElementById('t'+i+'f').classList.toggle('sel',v===false)}
+function check(){if(run.done)return;const q=run.qs[run.k];let ok;
+ if(q.tf){if(run.tf.filter(x=>x!==undefined).length<q.tf.length&&!confirm('មានសំណួរមិនទាន់ឆ្លើយ។ ពិនិត្យតែម្តង?'))return;run.done=true;ok=true;
+  q.tf.forEach((a,i)=>{const t=document.getElementById('t'+i+'t'),f=document.getElementById('t'+i+'f');t.disabled=f.disabled=true;t.classList.remove('sel');f.classList.remove('sel');
+   (a?t:f).classList.add('ok');if(run.tf[i]!==a){ok=false;if(run.tf[i]!==undefined)(a?f:t).classList.add('no')}})}
+ else{if(!run.sel.length)return;run.done=true;const a=q.a;ok=a.length==run.sel.length&&a.every(x=>run.sel.includes(x));
+  bs().forEach((x,j)=>{x.disabled=true;x.classList.remove('sel');if(a.includes(j))x.classList.add(run.sel.includes(j)?'ok':'miss');else if(run.sel.includes(j))x.classList.add('no')})}
+ if(ok)run.sc++;else run.bad.push(q);
+ document.getElementById('ck').classList.add('hide');document.getElementById('nx').classList.remove('hide')}
+function next(){run.k++;run.k<run.qs.length?show():end()}
+const ansTxt=q=>q.tf?q.tf.map((a,i)=>'abcde'[i]+'='+(a?'True':'False')).join(' · '):arr(q.a).map(i=>L[i]+(q.o?'. '+esc(q.o[i]):'')).join(' / ');
+function end(){const{s,qs,sc,bad}=run,p=Math.round(sc/qs.length*100);if(qs.length==s.questions.length)setBest(s.id,p);
+ $.innerHTML=`<h2>លទ្ធផល · ${s.name}</h2><div class="big">${p}%</div><div class="mu">ត្រូវ ${sc} / ${qs.length}</div>
+ <div class="row" style="margin-top:18px">${bad.length?`<button class="btn" onclick="start(run.bad.map(q=>({...q})))">ធ្វើសំណួរខុសឡើងវិញ (${bad.length})</button>`:''}<button class="btn g" onclick="setup('${s.id}')">ធ្វើម្តងទៀត</button><button class="btn g" onclick="home()">មុខវិជ្ជាផ្សេង</button></div>`+
+ (bad.length?`<h2 style="margin-top:26px">សំណួរដែលខុស</h2>`+bad.map(q=>`<div class="rv">${q.img?`<div class="iw"><img class="qi" src="${q.img}"></div>`:`<b>${esc(q.q)}</b>`}<div style="color:var(--ok);margin-top:6px">✓ ${ansTxt(q)}</div></div>`).join(''):'<h2>🎉 ត្រូវទាំងអស់!</h2>')}
+document.addEventListener('keydown',e=>{if(!run||run.done&&e.key!='Enter')return;const q=run.qs[run.k];
+ if(e.key=='Enter'){if(run.done)next();else if(document.getElementById('ck'))check();return}
+ const i='abcde'.indexOf(e.key.toLowerCase());if(i>=0&&!q.tf&&i<(q.img?q.n:q.o.length))pick(i)});
+home();
+</script></body></html>
